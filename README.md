@@ -24,7 +24,7 @@ Nimikantarivi tulee jättää tyhjäksi, eli xlsx tiedostoon VAIN nimet
 |     ...     |    ...     |    ...
 3. Asennetaan tarvittavat paketit pythoniin:
     ```
-    python3 -m pip install requirements.txt
+    python3 -m pip install -r requirements.txt
     ```
 
 4. Aja scipti:
