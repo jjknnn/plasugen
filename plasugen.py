@@ -154,21 +154,6 @@ def balance_table(names):
     return no_dups
 
 
-def get_weights(names):
-    """
-    Get weights of the datasets
-    NOTE: Currently unused
-    """
-    weights = []
-    total = 0
-    for name in names:
-        total += len(names[name])
-    for name in names:
-        if len(names[name]) != 0:
-            weights.append(len(names[name]) / total)
-    return weights
-
-
 def fill_names_order(names, tables):
     """
     Fill names to tables when using ordered method
