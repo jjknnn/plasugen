@@ -10,7 +10,7 @@ jo kokeilla!
 #### Käyttöohjeet
 
 Ajaaksesi plasugen.py scriptin tarvitset nimilistan, pythonin
-asennettuna laitteellesi  ja pääsyn komentoriville. 
+ja gitin asennettuna laitteellesi  ja pääsyn komentoriville. 
 
 1. Navigoi komentorivillä plasugen kansioon.
 2. Kopioi nimilista kansioon ja nimeä se ```nimilista.xlsx```. Tyypin
@@ -22,17 +22,25 @@ Nimikantarivi tulee jättää tyhjäksi, eli xlsx tiedostoon VAIN nimet
 | Nimi Niminen|    ...     |    ...
 | Nani Naninen|    ...     |    ...
 |     ...     |    ...     |    ...
-3. Asennetaan tarvittavat paketit pythoniin:
+
+3. Navigoi komentorivillä kansioon missä haluat tiedostojen sijaitsevan
+ja kopioi tiedostot
+    ```
+    git clone https://github.com/jjknnn/plasugen.git
+    ```
+
+
+4. Asennetaan tarvittavat paketit pythoniin:
     ```
     python3 -m pip install -r requirements.txt
     ```
 
-4. Aja scipti:
+5. Aja scipti:
 
     ```
     python3 plasugen.py
     ```
-5. Scipti generoi ```names.xlsx``` nimisen tiedoston, josta löytyy 
+6. Scipti generoi ```names.xlsx``` nimisen tiedoston, josta löytyy 
 pöydät nimineen
 
 Scripti kysyy seuraavia asioita:
