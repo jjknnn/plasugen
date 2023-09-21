@@ -59,8 +59,15 @@ def fill_names_random(names, tables):
 
 def make_tuples(input_list):
     result = []
-    for i in range(0, len(input_list), 2):
-        result.append((input_list[i], input_list[i + 1]))
+    if len(input_list) % 2 == 0:
+        for i in range(0, len(input_list), 2):
+            result.append((input_list[i], input_list[i + 1]))
+    else:
+        for i in range(0, len(input_list) - 1, 2):
+            result.append((input_list[i], input_list[i + 1]))
+            mem = i
+        result.append((input_list[i+2], ""))
+
     return result
 
 
@@ -70,12 +77,13 @@ def make_file(generated):
     mem = 1
     for names in generated:
         for name in generated[names]:
-            if len(name) != 1:
-                print(name)
+            if len(name) >= 2:
                 ws[f"A{mem}"], ws[f"B{mem}"] = name
                 mem += 1
-            else:
+            elif len(name) == 1:
                 ws[ws[f"A{mem}"]] = name
+            else:
+                continue
         ws[f"A{mem}"], ws[f"B{mem}"] = ("", "")
         mem += 1
     wb.save("names.xlsx")
