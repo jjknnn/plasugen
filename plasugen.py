@@ -3,13 +3,18 @@ from openpyxl import load_workbook, Workbook
 
 
 def open_file():
+    """
+    Read xlsx file
+    """
     names = {}
     wb = load_workbook(filename="nimilista.xlsx")
 
     sheet = wb.active
 
+    # Fetch names from xlsx based on columns
     for count, column in enumerate(sheet.iter_cols(values_only=True)):
         none_removed_list = []
+        # Remove empty cells
         for val in list(column):
             if val is not None:
                 none_removed_list.append(val)
@@ -18,6 +23,9 @@ def open_file():
 
 
 def ask_user_tables():
+    """
+    Ask user for table sizes and amounts
+    """
     ans = True
     i = 0
     print("Määritetään pöytien määrät ja koot")
@@ -38,6 +46,9 @@ def ask_user_tables():
 
 
 def ask_user_type():
+    """
+    Ask user for name sorting type
+    """
     print("Miten haluat pöydät järjestettävän: ")
     inp = input("R(andom) / J(ärjestys): ")
     if inp.lower == "r" or "random":
@@ -46,11 +57,18 @@ def ask_user_type():
 
 
 def fill_names_random(names, tables):
+    """
+    Fill names to given tables randomly
+    """
     tables_with_names = {}
     all_names = []
     for name in names:
         all_names.extend(names[name])
+
+    # Shuffle names
     random.shuffle(all_names)
+
+    # Generate tables with names
     for i, table in enumerate(tables):
         tables_with_names[i] = make_tuples(all_names[: int(tables[table])])
         all_names = all_names[int(tables[table]) :]
@@ -58,6 +76,9 @@ def fill_names_random(names, tables):
 
 
 def make_tuples(input_list):
+    """
+    Makes tuples from the names for feeding to tables
+    """
     result = []
     if len(input_list) % 2 == 0:
         for i in range(0, len(input_list), 2):
@@ -65,13 +86,14 @@ def make_tuples(input_list):
     else:
         for i in range(0, len(input_list) - 1, 2):
             result.append((input_list[i], input_list[i + 1]))
-            mem = i
         result.append((input_list[i+2], ""))
-
     return result
 
 
 def make_file(generated):
+    """
+    Make xlsx file with A and B column with names
+    """
     wb = Workbook()
     ws = wb.active
     mem = 1
@@ -90,6 +112,10 @@ def make_file(generated):
 
 
 def balance_table(names):
+    """
+    Generate names to such order that they are evenly divided to the tables
+    TODO: Reformat this method
+    """
     completed_name_list = []
     list_list = []
     for list in names:
@@ -125,13 +151,14 @@ def balance_table(names):
             if n not in no_dups:
                 random_index = random.randint(0, len(no_dups))
                 no_dups.insert(random_index, n)
-    print(no_dups)
-    print(len(no_dups))
-
     return no_dups
 
 
 def get_weights(names):
+    """
+    Get weights of the datasets
+    NOTE: Currently unused
+    """
     weights = []
     total = 0
     for name in names:
@@ -143,6 +170,9 @@ def get_weights(names):
 
 
 def fill_names_order(names, tables):
+    """
+    Fill names to tables when using ordered method
+    """
     for name in names:
         print(name)
     balanced = balance_table(names)
@@ -155,6 +185,9 @@ def fill_names_order(names, tables):
 
 
 def make_file_order(generated):
+    """
+    Makes the xlsx file when using ordered method
+    """
     wb = Workbook()
     ws = wb.active
     mem = 1
@@ -169,6 +202,9 @@ def make_file_order(generated):
 
 
 def shuffle_names(names):
+    """
+    Shuffles names from xlsx
+    """
     shuffled = {}
     for name in names:
         if len(names[name]) != 0:
