@@ -22,26 +22,35 @@ def open_file():
     return names
 
 
-def ask_user_tables():
+def ask_user_tables(count):
     """
     Ask user for table sizes and amounts
     """
     ans = True
     i = 0
-    print("Määritetään pöytien määrät ja koot")
+    print("\nMääritetään pöytien määrät ja koot")
     tables = {}
     while ans:
+        print(f"Nimiä jäljellä: {count}")
         places = input("Syötä pöydän paikkamäärä: ")
         amount = input("Syötä kyseisten pöytien määrä: ")
+        if int(places)*int(amount) > count:
+            print("\nSyötit enemmän paikkoja kun listassa on nimiä!\nPöytää ei lisätty!")
+            continue
         a = 0
         while a < int(amount):
             tables[i] = places
             a += 1
             i += 1
+        count -= int(places)*int(amount)
+        if count == 0:
+            print("Kaikki paikat täytetty!")
+            break
         i += 1
         cont = input("Jatketaanko? y/n ")
         if cont != "y":
             ans = False
+        print()  # Newline to help readability
     return tables
 
 
@@ -202,12 +211,16 @@ def main():
     names = open_file()
     names = shuffle_names(names)
     random = ask_user_type()
-    tables = ask_user_tables()
+    amount = 0
+    for name in names:
+        amount += len(names[name])
+    tables = ask_user_tables(amount)
     if random:
         generated = fill_names_random(names, tables)
     else:
         generated = fill_names_order(names, tables)
     make_file(generated)
+    print("names.xlsx luotu! Katso kansion sisältö!")
 
 
 main()
