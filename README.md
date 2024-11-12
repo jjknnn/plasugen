@@ -1,13 +1,16 @@
 # plasugen.py
 
-Luo istumajärjestys tapahtumaasi vaivattomasti! Scipti on vielä
-kehityksessä! Innokkaat istumajärjestyksen luojat voivat toki
-jo kokeilla!
+Luo istumajärjestys tapahtumaasi vaivattomasti! Scipti Toimii mutta bugivapaustakuuta en anna!
+Eikun vaan kokeilemaan!
+
+Varmaan jossain vaiheessa luon tästä suoritettavan .exe tiedoston.
 
 ##
 
 
-#### Käyttöohjeet
+### Käyttöohjeet
+
+**Kaverisitsien ohjeet alempana**
 
 Ajaaksesi plasugen.py scriptin tarvitset nimilistan, pythonin
 ja gitin asennettuna laitteellesi  ja pääsyn komentoriville. 
@@ -55,7 +58,22 @@ Scripti kysyy seuraavia asioita:
     3. Jatketaanko y/n: Jos haluat luoda lisää pöytiä syötä y, 
     jos kaikki pöydät syötetty, syötä n
 
-##### Scripti saattaa antaa erroreita ja korjailen bugeja kunhan kerkiän
+### Kaverisitsit
+
+Kaverisitsit toimivat pitkälti samalla tavalla kuin ylempä.
+Lue ensiksi se, ja sitten palaa tähän.
+
+Nimilistan muotoilu on hieman erilainen. Muotoile nimet tiedostoon ```nimilista.xlsx``` seuraavanlaisesti:
+
+| Ryhmänjäsen1| jäsen2          |jäsen3        | jäsen4 | ja niin edelleen |
+| ----------  |:----------:     |:---------:   |  :-:   |         ---      |
+| Mortti      | Mortin kaveri1  |Mortin kaveri2| ...    |                  |
+| Nanni       | Nannin kaveiri1 |    ...       | ...    |                  |
+|     ...     |    ...          |    ...       | ...    |                  |
+
+Scripti kysyy muuten samat asiat, mutta syötä kysymylseen random/järjestys/kaveri kirjain ```k```
+
+##### Scripti saattaa antaa erroreita. Saa nostaa issueiksi jos haluaa
     
     
     
