@@ -1,5 +1,6 @@
 import random
 from openpyxl import load_workbook, Workbook
+from openpyxl.styles import PatternFill
 
 
 def open_file():
@@ -34,15 +35,17 @@ def ask_user_tables(count):
         print(f"Nimiä jäljellä: {count}")
         places = input("Syötä pöydän paikkamäärä: ")
         amount = input("Syötä kyseisten pöytien määrä: ")
-        if int(places)*int(amount) > count:
-            print("\nSyötit enemmän paikkoja kun listassa on nimiä!\nPöytää ei lisätty!")
+        if int(places) * int(amount) > count:
+            print(
+                "\nSyötit enemmän paikkoja kun listassa on nimiä!\nPöytää ei lisätty!"
+            )
             continue
         a = 0
         while a < int(amount):
             tables[i] = places
             a += 1
             i += 1
-        count -= int(places)*int(amount)
+        count -= int(places) * int(amount)
         if count == 0:
             print("Kaikki paikat täytetty!")
             break
@@ -59,10 +62,13 @@ def ask_user_type():
     Ask user for name sorting type
     """
     print("Miten haluat pöydät järjestettävän: ")
-    inp = input("R(andom) / J(ärjestys): ")
-    if inp.lower == "r" or "random":
-        return True
-    return False
+    while True:
+        inp = input("R(andom) / J(ärjestys) /K(averi): ")
+        if inp.lower() in ["r", "k", "j"]:
+            break
+        else:
+            print("Hyväksytyt syötteet:  r, j, tai k.")
+    return inp[0]
 
 
 def fill_names_random(names, tables):
@@ -95,11 +101,11 @@ def make_tuples(input_list):
     else:
         for i in range(0, len(input_list) - 1, 2):
             result.append((input_list[i], input_list[i + 1]))
-        result.append((input_list[i+2], ""))
+        result.append((input_list[i + 2], ""))
     return result
 
 
-def make_file(generated):
+def make_file(generated, colors_for_names):
     """
     Make xlsx file with A and B column with names
     """
@@ -117,13 +123,39 @@ def make_file(generated):
                 continue
         ws[f"A{mem}"], ws[f"B{mem}"] = ("", "")
         mem += 1
+    if colors_for_names:
+        ws = color_workbook(ws, colors_for_names)
     wb.save("names.xlsx")
+
+
+def color_workbook(ws, colors_for_names):
+    """
+    Loop through all cells and apply colors based on the value in given color dictionary
+    """
+    for row in ws.iter_rows():
+        for cell in row:
+            if cell.value in colors_for_names:
+                # Get the RGB color from the dictionary and convert it to hex
+                rgb_color = colors_for_names[cell.value]
+                hex_color = rgb_to_hex(rgb_color)
+
+                # Apply the background color
+                fill = PatternFill(
+                    start_color=hex_color, end_color=hex_color, fill_type="solid"
+                )
+                cell.fill = fill
+    return ws
+
+
+def rgb_to_hex(rgb):
+    """Helper function to return hex from rgb"""
+    return "{:02X}{:02X}{:02X}".format(*rgb)
 
 
 def balance_table(names):
     """
     Generate names to such order that they are evenly divided to the tables
-    TODO: Reformat this method
+    TODO: Reformat this method. It's a disaster :)
     """
     completed_name_list = []
     list_list = []
@@ -167,15 +199,97 @@ def fill_names_order(names, tables):
     """
     Fill names to tables when using ordered method
     """
-    for name in names:
-        print(name)
     balanced = balance_table(names)
-    print(len(balanced))
     tables_with_names = {}
     for i, table in enumerate(tables):
         tables_with_names[i] = make_tuples(balanced[: int(tables[table])])
         balanced = balanced[int(tables[table]) :]
     return tables_with_names
+
+
+def fill_names_buddies(names, tables, groups):
+    """
+    Documentation wow
+    """
+    group_sizes = get_group_sizes(names)
+
+    # sorted_items = sorted(group_sizes.items(), key=lambda x: x[1], reverse=True)
+    table_sizes = [int(tables[table]) for table in tables]
+    print(
+        "Kaverisitsien paikkajako kestää pitkään jos monta epämääräistä pöytää. \
+          \nOdotathan hetken."
+    )
+    while True:
+        shuffled_groups = shuffle_groups(group_sizes)
+        not_all_filled, seat_distribution = try_to_sort_to_tables(
+            shuffled_groups, table_sizes
+        )
+        if not_all_filled:
+            continue
+        else:
+            break
+    print("Löytyi")
+    tables_with_names = add_names(seat_distribution, groups)
+    return tables_with_names
+
+
+def add_names(distribution, groups):
+    """
+    Fills group member names from the given groups dictionary
+    """
+    tables = {}
+    for i, table in enumerate(distribution):
+        table_with_all_names = []
+        for name in distribution[table][2]:
+            table_with_all_names.extend(groups[name])
+        tables[i] = make_tuples(table_with_all_names)
+    return tables
+
+
+def try_to_sort_to_tables(groups, tables):
+    """
+    Tries to force groups into tables
+    If perfect match returns False as not_added
+    """
+    not_added = False
+    tables_with_names = {}
+    for i, table in enumerate(tables, 0):
+        tables_with_names[i] = [table, 0, []]
+
+    for j, (name, amount) in enumerate(groups, 0):
+        n = j % (i + 1)
+        if tables_with_names[n][1] <= tables_with_names[n][1] + amount:
+            tables_with_names[n][1] += amount  # Add the amount to table
+            tables_with_names[n][2].append(name)  # Add the name(s) to the list of names
+        if tables_with_names[n][1] > tables_with_names[n][0]:
+            not_added = True
+            continue
+    return not_added, tables_with_names
+
+
+def get_group_sizes(names):
+    """
+    Returns how many occurrances of a name is in given list as a dictionary
+    """
+    # Remove dictionary structure used to identify different subgroups
+    # (f.ex different organization groups etc)
+    names = names[0]
+    group_sizes = {}
+    for name in names:
+        if not group_sizes.get(name):
+            group_sizes[name] = 1
+        else:
+            group_sizes[name] += 1
+    return group_sizes
+
+
+def shuffle_groups(groups):
+    """
+    Helper function to shuffle group order
+    """
+    groups_as_tuple = list(groups.items())
+    random.shuffle(groups_as_tuple)
+    return tuple(groups_as_tuple)
 
 
 def make_file_order(generated):
@@ -187,7 +301,6 @@ def make_file_order(generated):
     mem = 1
     for names in generated:
         for name in generated[names]:
-            print(name)
             ws[f"A{mem}"], ws[f"B{mem}"] = name
             mem += 1
         ws[f"A{mem}"], ws[f"B{mem}"] = ("", "")
@@ -207,19 +320,73 @@ def shuffle_names(names):
     return shuffled
 
 
+def parse_buddy_names_from_file():
+    """
+    Get the names of buddies from the .xlsx file
+    Returns groups and colours for groups
+    """
+    color_dictionary = {}
+    wb = load_workbook(filename="nimilista.xlsx")
+    sheet = wb.active
+    buddy_dictionary = {}
+    # Fetch names from xlsx based on columns
+    for column in sheet.iter_rows(values_only=True):
+        group_color = generate_group_color()
+        none_removed_list = []
+        # Remove empty cells
+        for val in list(column):
+            if val is not None:
+                none_removed_list.append(val)
+        buddy_dictionary[column[0]] = none_removed_list
+        for name in none_removed_list:
+            color_dictionary[name] = group_color
+    return buddy_dictionary, color_dictionary
+
+
+def generate_group_color():
+    """
+    Generates a random color in rgb
+    """
+    r = random.randint(0, 255)
+    g = random.randint(0, 255)
+    b = random.randint(0, 255)
+    return (r, g, b)
+
+
+def duplicate_names_to_match_group_size(names, groups):
+    """
+    Duplicates a name to make matching to tables easier
+    """
+    all_names = []
+    names = {}
+    for group in groups:
+        for _ in range(len(groups[group])):
+            all_names.append(group)
+    names[0] = all_names
+    return names
+
+
 def main():
     names = open_file()
-    names = shuffle_names(names)
-    random = ask_user_type()
+    organization_type = ask_user_type()
+    if organization_type.lower() == "k":
+        names_with_buddy_names, color_dictionary = parse_buddy_names_from_file()
+        names = duplicate_names_to_match_group_size(names, names_with_buddy_names)
+    else:
+        color_dictionary = False
     amount = 0
     for name in names:
         amount += len(names[name])
     tables = ask_user_tables(amount)
-    if random:
+    if organization_type.lower() == "r":
+        names = shuffle_names(names)
         generated = fill_names_random(names, tables)
-    else:
+    elif organization_type.lower() == "j":
+        names = shuffle_names(names)
         generated = fill_names_order(names, tables)
-    make_file(generated)
+    elif organization_type.lower() == "k":
+        generated = fill_names_buddies(names, tables, names_with_buddy_names)
+    make_file(generated, color_dictionary)
     print("names.xlsx luotu! Katso kansion sisältö!")
 
 
